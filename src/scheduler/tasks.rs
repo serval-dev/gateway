@@ -1,21 +1,20 @@
 
-#[derive(Clone)]
-pub struct Task<'a> {
-    pub runner: &'a dyn Fn() -> Result<bool, String>,
+pub struct Task {
+    pub runner: Box<dyn Fn() -> Result<bool, String>>,
     pub delay: u32,
     pub block: bool,
 }
 
-unsafe impl Sync for Task<'_> {}
+unsafe impl Sync for Task {}
 
-impl Task<'_> {
+impl Task {
     pub fn run(&self) {
         (self.runner)();
     }
 
     pub fn new(f: &dyn Fn() -> Result<bool, String>, block: bool) -> Self {
         Task { 
-            runner: f,
+            runner: Box::new(f),
             delay: 0,
             block
         }
@@ -23,7 +22,7 @@ impl Task<'_> {
 
     pub fn new_with_delay(f: &dyn Fn() -> Result<bool, String>, block: bool, delay: u32) -> Self {
         Task { 
-            runner: f,
+            runner: Box::new(f),
             delay,
             block
         }
